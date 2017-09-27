@@ -4,8 +4,9 @@ import importlib, subprocess, traceback
 
 
 class Plugin(object):
-    def __init__(self):
+    def __init__(self, host=None):
         # 这里将settings中的配置在构造函数赋值作为对象属性，更易于管理
+        self.host = host
         self.mode = settings.MODE
         self.plugin = settings.PLUGIN
         self.debug = settings.DEBUG
@@ -42,6 +43,7 @@ class Plugin(object):
             # 'network': {'status': True, 'detail': 'network info ..................', 'error_msg': None}
             # }
 
+        print(data)
         return data
 
     def execute_cmd(self,cmd):

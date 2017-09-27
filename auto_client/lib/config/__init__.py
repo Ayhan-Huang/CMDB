@@ -21,13 +21,13 @@ class Settings(object):
             if option.isupper():
                 key = option
                 value = getattr(global_settings, key)  # 从模块的名称空间取变量（key）的值
-                print('key:',key, 'value:value')
+                # print('key:',key, 'value:value')
                 setattr(self, key, value)  # 为对象增加属性
 
         # 导入自定义配置（从环境变量中读取配置路径）
         # 字符串路径，importlib, 剩下的同上。
         custom_settings_path = os.environ.get('AUTO_CLIENT_SETTING')
-        print(custom_settings_path) # conf.settings
+        # print(custom_settings_path) # conf.settings
         settings_module = importlib.import_module(custom_settings_path)
         for option in dir(settings_module):
             if option.isupper():
