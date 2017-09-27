@@ -91,7 +91,10 @@ class Disk(models.Model):
     model = models.CharField('磁盘型号', max_length=32)
     capacity = models.FloatField('磁盘容量GB')
     pd_type = models.CharField('磁盘类型', max_length=32)
-    server_obj = models.ForeignKey('Server',related_name='disk')
+    # server_obj = models.ForeignKey('Server',related_name='disk')
+    server_obj = models.ForeignKey('Server')
+    # 测试发现，related_name='disk' 相当于在Server表中增加了一个disk字段，来获取disk集合；
+    # 这样就不需要disk_set来反向查询了
 
     class Meta:
         verbose_name_plural = "硬盘表"
