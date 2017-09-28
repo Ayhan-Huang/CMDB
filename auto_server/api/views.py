@@ -19,6 +19,23 @@ def server(request):
     server_obj = Server.objects.filter(hostname=hostname).first()
 
     if server_obj: # 取出其相关的硬件信息
+
+        # 判断服务器信息是否更新：服务器由basic 和 board 字段组成的，字典合并操作
+        new_server_dict = data['basic']
+        # new_server_dict.pop('hostname')
+        # for field, value in new_server_dict:
+        #     if 1:
+        #         pass
+
+
+
+
+
+
+
+
+
+
         # 假设先对其中的disk进行处理,
         latest_disk_set = data['disk']['detail']
         # {'0': {'slot': '0', 'model': 'xxx', }, '1': {'slot': '0', 'model': 'xxx', }}
@@ -71,19 +88,15 @@ def server(request):
 
         existing_slots = latest_slots & former_slots
         if existing_slots:
-            # 通过slot拿到latest_disk_set中的l_disk
-            # 通过slot拿到former_disk_set中的f_disk，对比属性是否有变化
+            # 通过slot拿到latest_disk_set中的latest_disk
+            # 通过slot拿到Disk中的disk_obj，对比属性是否有变化  --> 反射
             for slot in existing_slots:
                 latest_disk = latest_disk_set[slot]
-                disk_obj = Disk.objects.filter(slot=slot).first()
+                disk_obj = Disk.objects.filter(slot=slot, server_obj=server_obj).first()
 
-                if disk_obj.model != latest_disk['model']:
-                    disk_obj.model = latest_disk['model']
-                if disk_obj.capacity != latest_disk['capacity']:
-                    disk_obj.capacity = latest_disk['capacity']
-                if disk_obj.pd_type != latest_disk['pd_type']:
-                    disk_obj.pd_type = latest_disk['pd_type']
-
+                for field, value in latest_disk.items():
+                    if getattr(disk_obj, field) != latest_disk[field]:
+                        setattr(disk_obj,field, value)
                 disk_obj.save()
 
     else: # #####################################################################################新增服务器和硬件
