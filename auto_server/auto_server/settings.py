@@ -121,3 +121,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+PLUGIN = {
+    'disk': 'api.src.plugin.disk.Disk',
+    'memory': 'api.src.plugin.memory.Memory',
+    'network': 'api.src.plugin.network.Network',
+}

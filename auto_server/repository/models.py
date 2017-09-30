@@ -52,8 +52,8 @@ class Server(models.Model):
 
     manage_ip = models.GenericIPAddressField('管理IP', null=True, blank=True)
 
-    os_platform = models.CharField('系统', max_length=16, null=True, blank=True)
-    os_version = models.CharField('系统版本', max_length=16, null=True, blank=True)
+    os_platform = models.CharField('系统', max_length=64, null=True, blank=True)
+    os_version = models.CharField('系统版本', max_length=64, null=True, blank=True)
 
     cpu_count = models.IntegerField('CPU个数', null=True, blank=True)
     cpu_physical_count = models.IntegerField('CPU物理个数', null=True, blank=True)

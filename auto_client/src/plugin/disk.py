@@ -18,7 +18,6 @@ class Disk:
             output = execute_cmd('ifconfig')
 
         res = self.parse(output)
-        # return 'disk info.........'
         return res
 
     def parse(self, content):

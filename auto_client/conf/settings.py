@@ -6,7 +6,9 @@ PLUGIN = {
     'disk': 'src.plugin.disk.Disk',
     'memory': 'src.plugin.memory.Memory',
     'network': 'src.plugin.network.Network',
-    'basic': 'src.plugin.basic.Basic',
+    # 'basic': 'src.plugin.basic.Basic',
+    # 'board': 'src.plugin.board.Board',
+    # 以上两项作为主机信息，必须采集，应该不应该作为用户自定义配置  --> 移至内部global_settings
 }
 
 DEBUG = True

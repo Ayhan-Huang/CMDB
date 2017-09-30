@@ -24,18 +24,24 @@ class Settings(object):
                 # print('key:',key, 'value:value')
                 setattr(self, key, value)  # 为对象增加属性
 
-        # 导入自定义配置（从环境变量中读取配置路径）
+        # 导入自定义配置（从环境变量中读取配置路径：
+        # 自定义配置目录用户可能会修改，在程序的入口，将配置路径写入环境变量，这样保证这里始终能拿到自定义配置，完成配置的合并
         # 字符串路径，importlib, 剩下的同上。
         custom_settings_path = os.environ.get('AUTO_CLIENT_SETTING')
-        # print(custom_settings_path) # conf.settings
         settings_module = importlib.import_module(custom_settings_path)
+        # 需要对global_settings中的PLUGIN 与自定义配置中的PLUGIN合并，而不是覆写
         for option in dir(settings_module):
             if option.isupper():
                 # print(option)
                 key = option
                 value = getattr(settings_module, key)
-                setattr(self, key, value)
+                if key == 'PLUGIN':
+                    self.PLUGIN.update(value)
+                else:
+                    setattr(self, key, value)
 
 settings = Settings()
+print('PLUGIN...........\n', settings.PLUGIN)
+
 # 这里是参考jango的配置文件来设计的
 # 由于赋值顺序，如果有重复的配置，自定义配置会覆盖内部配置

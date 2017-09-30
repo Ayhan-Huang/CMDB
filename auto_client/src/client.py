@@ -23,6 +23,11 @@ class AgentClient(BaseClient):
 
 
 class SshSaltClient(BaseClient):
+    """
+    ssh, salt模式：
+    1. 获取主机列表
+    2. 因为是在一台中控机上运行，采集所有服务器信息，所以需要多线程
+    """
     def get_host_list(self):
         return ['c1',] # 因为是测试，这里只放一个
 

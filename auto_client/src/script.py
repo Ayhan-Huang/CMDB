@@ -9,9 +9,7 @@ def start():
     from lib.config import settings
     if settings.MODE == 'AGENT':
         obj = AgentClient()
-    elif settings.MODE == 'SSH':
-        obj = SshSaltClient()
-    elif settings.MODE == 'SALT':
+    elif settings.MODE == 'SSH'or settings.MODE == 'SALT':
         obj = SshSaltClient()
     else:
         raise Exception('MODE ERROR!')

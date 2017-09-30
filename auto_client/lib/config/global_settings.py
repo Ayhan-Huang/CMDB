@@ -3,3 +3,8 @@
 TEST = True
 
 NAME = "Ayhan"
+
+PLUGIN = {
+    'basic': 'src.plugin.basic.Basic',
+    'board': 'src.plugin.board.Board',
+}
