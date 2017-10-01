@@ -1,5 +1,5 @@
 class Network:
-    def __int__(self, server_obj, data):
+    def __init__(self, server_obj, data):
         self.server_obj = server_obj
         self.data = data
 
