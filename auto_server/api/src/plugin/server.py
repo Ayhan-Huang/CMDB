@@ -1,3 +1,6 @@
+import datetime
+
+
 class Server:
     def __init__(self, server_obj, data):
         self.server_obj = server_obj
@@ -27,6 +30,8 @@ class Server:
                 )  # 这里不能用server_obj[field]... 会报错
                 record_list.append(record)
                 setattr(self.server_obj, field, new_val)
-                self.server_obj.save()
+
+        self.server_obj.latest_date = datetime.datetime.now()  # 用于判断服务采集状态
+        self.server_obj.save()
         record_info = '\n'.join(record_list)
         print('record_info .........\n', record_info)

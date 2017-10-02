@@ -45,6 +45,14 @@ class Server(models.Model):
     """
     # asset = models.OneToOneField('Asset')
 
+    server_status_code = (
+        (1, '上架'),
+        (2, '上线'),
+        (3, '离线'),
+        (4, '下架'),
+    )
+    server_status = models.IntegerField(choices=server_status_code, default=1)
+
     hostname = models.CharField(max_length=128, unique=True)
     sn = models.CharField('SN号', max_length=64, db_index=True)
     manufacturer = models.CharField(verbose_name='制造商', max_length=64, null=True, blank=True)
@@ -60,6 +68,7 @@ class Server(models.Model):
     cpu_model = models.CharField('CPU型号', max_length=128, null=True, blank=True)
 
     create_at = models.DateTimeField(auto_now_add=True, blank=True)
+    latest_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "服务器表"

@@ -78,6 +78,10 @@ class Disk:
             for field, value in latest_disk.items():
                 old_val = getattr(disk_obj, field)
                 new_val = value
+                print('old_val...%r' % old_val)
+                print('new_val...%r' % new_val)
+                # old_val...476.939
+                # new_val...'476.939' 检测发现数据库数据类型和传过来数据（字符串）不一致，因而导致每次都更新
                 if old_val != new_val:
                     record = '[{server}]更新了磁盘[{slot}], [{field}]信息由[{old}]更新为[{new}]'.format(
                         server=self.server_obj.hostname, slot=slot, field=field, old=old_val, new=new_val

@@ -2,23 +2,38 @@ from django.shortcuts import render, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from api.src.plugin import PluginManager
+from django.db.models import Q
+from datetime import date
+from repository import models
 
 
 @csrf_exempt
 def server(request):
+    if request.method == 'GET':
+        # 返回未采集主机列表：latest_date为空，或小于current_date；并且服务器状态为上线
+        # 采集完成后，更新latest_date
+        current_day = date.today()
+        host_list = models.Server.objects.filter(
+            Q(Q(latest_date=None) | Q(latest_date__date__lt=current_day)) & Q(server_status=2)
+        ).values('hostname')
+        host_list = list(host_list) # QuerySet对象无法被json
+        return HttpResponse(json.dumps(host_list))
+
+
+    elif request.method == 'POST':
     # 客户端请求头指定是json字符串，request.post无法获取内容，需要用request.body, 然后反序列化
-    data = json.loads(request.body.decode('utf-8'))
-    # print('data---------%r'%data)
+        data = json.loads(request.body.decode('utf-8'))
+        # print('data---------%r'%data)
 
-    # 每次发过来的数据，是一台server的，根据server标识从数据库中取出server_obj; 然后再对与该server相关的硬件进行入库/修改
-    if not data['basic']['status']:
-        print('错误信息')
-        return HttpResponse('something wrong')
+        # 每次发过来的数据，是一台server的，根据server标识从数据库中取出server_obj; 然后再对与该server相关的硬件进行入库/修改
+        if not data['basic']['status']:
+            print('错误信息')
+            return HttpResponse('something wrong')
 
-    plugin_manager = PluginManager()
-    response = plugin_manager.execute(data)
+        plugin_manager = PluginManager()
+        response = plugin_manager.execute(data)
 
-    return response
+        return response
 
     # 新增服务器和硬件, 上线时，首先会录入服务器信息，因此，以下不需要
     #     """

@@ -1,6 +1,6 @@
 from .plugin import Plugin
 from lib.config import settings
-import requests
+import requests, json
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -29,7 +29,10 @@ class SshSaltClient(BaseClient):
     2. 因为是在一台中控机上运行，采集所有服务器信息，所以需要多线程
     """
     def get_host_list(self):
-        return ['c1',] # 因为是测试，这里只放一个
+        response = requests.get(self.api)
+        host_list = response.text
+        return json.loads(host_list)
+        # return ['c1',] # 因为是测试，这里只放一个
 
     def task(self, host):
         obj = Plugin(host)
