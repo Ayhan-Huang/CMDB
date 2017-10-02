@@ -37,15 +37,15 @@ class PluginManager:
 
         for k, v in self.plugin.items():
             # 'disk': 'api.src.plugin.disk.Disk',
-            try:
-                module_path, cls_name = v.rsplit('.', maxsplit=1)
-                module = importlib.import_module(module_path)
-                cls = getattr(module, cls_name)
-                print('cls----', cls)
-                obj = cls(server_obj, data)
-                obj.process()
-            except Exception as e:
-                print('error..',e)
-                ret['code'] = 3
+            # try:
+            module_path, cls_name = v.rsplit('.', maxsplit=1)
+            module = importlib.import_module(module_path)
+            cls = getattr(module, cls_name)
+            print('cls----', cls)
+            obj = cls(server_obj, data)
+            obj.process()
+            # except Exception as e:
+            #     print('error..',e)
+            #     ret['code'] = 3
 
         return HttpResponse(json.dumps(ret))

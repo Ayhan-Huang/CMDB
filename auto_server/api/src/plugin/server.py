@@ -19,12 +19,14 @@ class Server:
         # 利用反射，更新server_obj信息; 记录日志：先作打印显示
         record_list = []
         for field, value in server_dict.items():
-            if getattr(self.server_obj, field) != server_dict[field]:
+            old_val = getattr(self.server_obj, field)
+            new_val = value
+            if old_val != new_val:
                 record = '[{hostname}]的[{field}]信息，由[{old}]，更新为[{new}]'.format(
-                    hostname=hostname, field=field, old='fuck', new=server_dict[field]
+                    hostname=hostname, field=field, old=old_val, new=new_val
                 )  # 这里不能用server_obj[field]... 会报错
                 record_list.append(record)
-                setattr(self.server_obj, field, value)
+                setattr(self.server_obj, field, new_val)
                 self.server_obj.save()
         record_info = '\n'.join(record_list)
         print('record_info .........\n', record_info)

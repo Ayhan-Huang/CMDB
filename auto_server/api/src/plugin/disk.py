@@ -13,14 +13,8 @@ class Disk:
         """
         latest_disk_dict = self.data['disk']['detail']
         # {'0': {'slot': '0', 'model': 'xxx', }, '1': {'slot': '0', 'model': 'xxx', }}
-        # 拿到一个字典集合：Disk表通过slot来查找，因此，取出Disk中的一台server下的所有obj -- 处理成字典形式；
-        # 对比接收到的数据，进行集合操作，如果有新slot， Disk插入数据；如果slot少了，Disk删除数据；对比字段信息是否有变化，更新
-
         former_disk_dict = self.server_obj.disk_set.values('slot', 'model', 'capacity', 'pd_type')
-        """
-        [{'slot': '0', 'model': 'SEAGATE ST300MM0006     LS08S0K2B5NV', 'capacity': 279.396, 'pd_type': 'SAS'}, {'slot': '1', 'model': 'SEAGATE ST300MM0006     LS08S0K2B5AH', 'capacity': 279.396, 'pd_type': 'SAS'}, {'slot': '2', 'model': 'S1SZNSAFA01085L     Samsung SSD 850 PRO 512GB               EXM01B6Q', 'capacity': 476.939, 'pd_type': 'SATA'}, {'slot': '3', 'model': 'S1AXNSAF912433K     Samsung SSD 840 PRO Series              DXM06B0Q', 'capacity': 476.939, 'pd_type': 'SATA'}, {'slot': '4', 'model': 'S1AXNSAF303909M     Samsung SSD 840 PRO Series              DXM05B0Q', 'capacity': 476.939, 'pd_type': 'SATA'}, {'slot': '5', 'model': 'S1AXNSAFB00549A     Samsung SSD 840 PRO Series              DXM06B0Q', 'capacity': 476.939, 'pd_type': 'SATA'}]
-        """
-
+        # [{'slot': '0', 'model': 'SEAGATE ST300MM0006     LS08S0K2B5NV', 'capacity': 279.396, 'pd_type': 'SAS'},{}]
         # 列表解析也可以处理集合
         latest_slots = {i for i in latest_disk_dict}
         former_slots = {i['slot'] for i in former_disk_dict}
@@ -28,34 +22,69 @@ class Disk:
         # latest_slots - former_slots 取差集 --> 新增
         # former_slots - latest_slots 取差集 --> 删除
         # latest_slots & former_slots 取交集 --> 检查属性是否有变更
-
         new_slots = latest_slots - former_slots
         if new_slots:
-            print('+++++ ', new_slots)
-            disk_list = []
-            for slot in new_slots:
-                new_disk = latest_disk_dict[slot]
-                disk_obj = models.Disk(**new_disk)
-                disk_obj.server_obj = self.server_obj
-                disk_list.append(disk_obj)
-            models.Disk.objects.bulk_create(disk_list)
+            self.add(new_slots, latest_disk_dict)
 
         del_slots = former_slots - latest_slots
         if del_slots:
-            print('----- ', del_slots)
-            for slot in del_slots:
-                disk_obj = models.Disk.objects.filter(slot=slot).first()
-                disk_obj.delete()
+            self.delete(del_slots)
 
         existing_slots = latest_slots & former_slots
         if existing_slots:
-            # 通过slot拿到latest_disk_dict中的latest_disk
-            # 通过slot拿到Disk中的disk_obj，对比属性是否有变化  --> 反射
-            for slot in existing_slots:
-                latest_disk = latest_disk_dict[slot]
-                disk_obj = models.Disk.objects.filter(slot=slot, server_obj=self.server_obj).first()
+            self.update(existing_slots, latest_disk_dict)
 
-                for field, value in latest_disk.items():
-                    if getattr(disk_obj, field) != latest_disk[field]:
-                        setattr(disk_obj, field, value)
-                disk_obj.save()
+    def add(self, new_slots, latest_disk_dict):
+        print('+++++ ', new_slots)
+        disk_list = []
+        record_list = []
+        for slot in new_slots:
+            new_disk = latest_disk_dict[slot]
+            disk_obj = models.Disk(**new_disk)
+            disk_obj.server_obj = self.server_obj
+            disk_list.append(disk_obj)
+            record = '[{server}]新增磁盘，槽位为[{slot}]'.format(
+                server=self.server_obj.hostname, slot=slot
+            )
+            record_list.append(record)
+
+        models.Disk.objects.bulk_create(disk_list)
+
+        record_info = '\n'.join(record_list)
+        print('新增磁盘信息..\n', record_info)
+
+    def delete(self, del_slots):
+        print('----- ', del_slots)
+        record_list = []
+        for slot in del_slots:
+            disk_obj = models.Disk.objects.filter(server_obj=self.server_obj, slot=slot).first()
+            record = '[{server}]删除了磁盘[{slot}]'.format(
+                server=self.server_obj, slot=slot
+            )
+            record_list.append(record)
+            disk_obj.delete()
+
+        record_info = '\n'.join(record_list)
+        print('新增磁盘信息..\n', record_info)
+
+    def update(self, existing_slots, latest_disk_dict):
+        # 通过slot拿到latest_disk_dict中的latest_disk
+        # 通过slot拿到Disk中的disk_obj，对比属性是否有变化  --> 反射
+        record_list = []
+        for slot in existing_slots:
+            latest_disk = latest_disk_dict[slot]
+            disk_obj = models.Disk.objects.filter(slot=slot, server_obj=self.server_obj).first()
+
+            for field, value in latest_disk.items():
+                old_val = getattr(disk_obj, field)
+                new_val = value
+                if old_val != new_val:
+                    record = '[{server}]更新了磁盘[{slot}], [{field}]信息由[{old}]更新为[{new}]'.format(
+                        server=self.server_obj.hostname, slot=slot, field=field, old=old_val, new=new_val
+                    )
+                    record_list.append(record)
+                    setattr(disk_obj, field, new_val)
+            disk_obj.save()
+
+        record_info = '\n'.join(record_list)
+        print('修改磁盘信息..\n', record_info)

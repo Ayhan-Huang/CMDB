@@ -125,5 +125,5 @@ STATIC_URL = '/static/'
 PLUGIN = {
     'disk': 'api.src.plugin.disk.Disk',
     'memory': 'api.src.plugin.memory.Memory',
-    # 'network': 'api.src.plugin.network.Network',
+    'network': 'api.src.plugin.network.Network',
 }
