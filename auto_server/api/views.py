@@ -1,12 +1,72 @@
 from django.shortcuts import render, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-import json
+import json, hashlib, time
 from api.src.plugin import PluginManager
 from django.db.models import Q
 from datetime import date
 from repository import models
 
 
+key = 'asdgasgewfqsef'
+temp_key = {
+    # client_md5: timestamp  --> 过期自动清除
+}
+
+# def auth(request):
+    # print(request.META)
+    # token = request.META.get('HTTP_AUTH_KEY')
+    # if token == key:
+    #     return HttpResponse('收到')
+    # else:
+    #     return HttpResponse('呵呵')
+
+    # print(request.META)
+
+# def auth(request):
+#     token = request.META.get('HTTP_AUTH_KEY')
+#     print('token...',token)
+#     # 6e632f8e858e07ffcc3b636a1577121b|1506983215.7659595
+#     # 分割出时间字符串，用时间字符串和key进行MD5校验
+#     client_md5 = token.split('|')[0]
+#     now = token.split('|')[1]
+#
+#     temp = '{key}|{time}'.format(key=key.encode('utf-8'),time=now)
+#     server_md5 = hashlib.md5(temp.encode('utf-8')).hexdigest()
+#
+#     if server_md5 == client_md5:
+#         return HttpResponse('收到')
+#     else:
+#         return HttpResponse('呵呵')
+
+
+def api_auth(func):
+    def auth(request, *args, **kwargs):
+        token = request.META.get('HTTP_AUTH_KEY')
+        print('token...',token)
+        # 6e632f8e858e07ffcc3b636a1577121b|1506983215.7659595
+        # 分割出时间字符串，用时间字符串和key进行MD5校验
+        client_md5 = token.split('|')[0]
+        timestamp = token.split('|')[1]
+
+        temp = '{key}|{time}'.format(key=key.encode('utf-8'), time=timestamp)
+        server_md5 = hashlib.md5(temp.encode('utf-8')).hexdigest()
+
+        # 5s过期验证
+        now = time.time()
+        if float(timestamp) + 5 < now:
+            return HttpResponse('呵呵')
+        elif server_md5 != client_md5:
+            return HttpResponse('呵呵')
+        elif temp_key[client_md5]:
+            return  HttpResponse('呵呵')
+        else:
+            temp_key[client_md5] = timestamp
+            return func(request, *args, **kwargs)
+
+    return auth
+
+
+@api_auth
 @csrf_exempt
 def server(request):
     if request.method == 'GET':

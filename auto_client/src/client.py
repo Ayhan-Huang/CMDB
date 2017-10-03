@@ -1,6 +1,6 @@
 from .plugin import Plugin
 from lib.config import settings
-import requests, json
+import requests, json, time, hashlib
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -12,7 +12,13 @@ class BaseClient(object):
         raise NotImplemented("子类必须实现execute方法")
 
     def post_data(self,data):
-        requests.post(self.api, json=data)
+        key = 'asdgasgewfqsef'
+
+        timestamp = time.time()
+        temp = '{key}|{time}'.format(key=key.encode('utf-8'), time=timestamp)
+        md5_str = hashlib.md5(temp.encode('utf-8')).hexdigest()
+        token = '{md5_str}|{time}'.format(md5_str=md5_str, time=timestamp)
+        response = requests.post(self.api, headers={"auth-key": token}, json=data)
 
 
 class AgentClient(BaseClient):
