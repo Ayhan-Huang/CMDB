@@ -3,13 +3,14 @@
  */
 
 function f1() {
+    //定义原型，令所有的String对象都有format方法
     String.prototype.format = function (args) {
         return this.replace(/\{(\w+)\}/g, function (s, i) {
             return args[i];
         });
     };
 
-//页面加载之后AJAX从/server/server_json/请求数据，渲染页面
+    //页面加载之后AJAX从/server/server_json/请求数据，渲染页面
 
     function init() {
         $('#loading').removeClass('hide'); //去除loading模态框隐藏
@@ -34,7 +35,7 @@ function f1() {
         })
     }
 
-// 填充表头
+    // 填充表头
     function initTableHead(table_config) {
         $('#tableThead').children("tr").empty();  //因为如果再次调用init()那么会导致表头重复添加，因此，每次都执行清空表头
         $.each(table_config, function (index, conf) {
@@ -46,7 +47,7 @@ function f1() {
         })
     }
 
-//填充表数据
+    //填充表数据
     function initTableBody(table_config, data_list) {
         /*
          data_list = [
@@ -94,4 +95,16 @@ function f1() {
 
     init();
 }
+/*
+用函数f1将其它函数包起来，初步完成了封装和作用域隔离
+然后在server.html中引入Papa_func, 执行f1()即可;
+但是f1这个函数在调用时可能和其它函数冲突，因此，在下一个版本中通过JS的自执行函数来代替f1()这种有名函数的封装
+最终版本，同目录下的King_func.js
+*/
 
+/* 使用：
+<script src="{% static 'js/Papa_func.js' %}"></script>
+<script>
+    f1();
+</script>
+ */

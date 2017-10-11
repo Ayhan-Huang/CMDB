@@ -8,6 +8,7 @@
 
     var requestUrl = "";
 
+    //定义原型，令所有的String对象都有format方法
     String.prototype.format = function (args) {
         return this.replace(/\{(\w+)\}/g, function (s, i) {
             return args[i];
@@ -105,3 +106,43 @@
 
 })(jQuery);
 
+/*
+1.自执行函数：实现了作用域的绝对隔离和函数名的冲突问题；
+2.定义jQuery扩展：拿到函数调用和执行的主动权。
+3.将ajax请求的url改为传参的方式，实现可复用。
+*/
+
+
+/*
+使用：
+<script src="{% static 'js/King_func.js' %}"></script>
+<script>
+    $.King_func('/server_json.html');
+</script>
+ */
+
+
+/************************************************************************
+//自执行函数（整个函数用括号包起来），函数无名子，加括号传参会立即执行
+(function (args) {
+    alert(args)
+})(666);
+
+//如果不需要立即执行的特性，利用jQuery扩展特性，为jQuery定义一个方法，调用该方法才执行
+jQuery.extend({
+    'myMethod': function (args) {
+        alert(args)
+    }
+});
+
+$(function () {
+    $.myMethod(777); //调用自定义方法
+})
+****************************************************************************/
+
+
+/* 其它说明：
+<script src="{% static 'plugins/jquery-3.2.1.js' %}"></script>
+在页面中引入jQuery之后，该对象全局可用
+$ 和 jQuery 是一样的
+ */

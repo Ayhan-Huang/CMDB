@@ -21,6 +21,6 @@ from web import urls as web_urls
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api/', include(api_urls)),
-    url(r'^', include(web_urls))  # 为空，走web路由
+    url(r'^', include(web_urls))  # 为空，分发至web路由
     # 路由分发不能加$, 否则终止了
 ]
