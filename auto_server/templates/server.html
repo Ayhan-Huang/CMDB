@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.3.7/dist/css/bootstrap.css' %}">
+
+    <style>
+        {# 设置加载模态框 #}
+        .loading {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            background-color: white;
+            opacity: 0.4;
+            z-index: 1000;
+        }
+
+        .loading .img {
+            height: 32px;
+            width: 32px;
+            background: url('/static/img/1_ayhan_huang.jpg');
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            margin-left: -16px;
+            margin-top: -16px;
+            z-index: 1001;
+        }
+
+    </style>
+
+</head>
+<body>
+<div class="container">
+    <h1>服务器列表</h1>
+    <table class="table table-bordered">
+        <thead id="tableThead">
+        <tr>
+
+        </tr>
+
+        </thead>
+        <tbody id="tableBody">
+
+        </tbody>
+    </table>
+</div>
+
+<div id="loading" class="loading hide">
+    <div class="img"></div>
+</div>
+
+<script src="{% static 'plugins/jquery-3.2.1.js' %}"></script>
+<script>
+    String.prototype.format = function (args) {
+        return this.replace(/\{(\w+)\}/g, function (s, i) {
+            return args[i];
+        });
+    };
+
+    //页面加载之后AJAX从/server/server_json/请求数据，渲染页面
+    $(function () {
+        init();
+    });
+
+    function init() {
+        $('#loading').removeClass('hide'); //去除loading模态框隐藏
+
+        $.ajax({
+            url: '/server_json.html',
+            type: 'GET',
+            data: {},
+            dataType: 'JSON',
+            success: function (response) {
+                //获取表头数据
+                console.log(response.table_config);
+                console.log(response.data_list);
+                initTableHead(response.table_config);
+                initTableBody(response.table_config, response.data_list);
+                // 去除loading效果
+                $('#loading').addClass('hide');
+            },
+            error: function () {
+                // 去除loading效果
+                $('#loading').addClass('hide');
+            }
+        })
+    }
+
+    // 填充表头
+    function initTableHead(table_config) {
+        $('#tableThead').children("tr").empty();  //因为如果再次调用init()那么会导致表头重复添加，因此，每次都执行清空表头
+        $.each(table_config, function (index, conf) {
+            var th = document.createElement('th');
+            th.innerHTML = conf.title;
+            console.log(conf.title);
+            console.log(th);
+            $('#tableThead').children('tr').append(th);
+        })
+    }
+
+    //填充表数据
+    function initTableBody(table_config, data_list) {
+        /*
+         data_list = [
+         {'hostname': xxx, 'sn': xxx, 'os": xxx}  --> row_dict
+         ]
+         */
+        $.each(data_list, function (index, row_dict) {
+            var tr = document.createElement('tr');
+
+            $.each(table_config, function (index, value) {
+                var td = document.createElement('td');
+                td.innerHTML = row_dict[value.q];
+                $(tr).append(td); // jQuery直接包dom对象
+            });
+
+            $('#tableBody').append(tr);
+        })
+    }
+</script>
+
+
+</body>
+</html>

@@ -23,7 +23,7 @@ print(response.text)
 
 fake = token
 time.sleep(6)
-response = requests.get(url, headers={"auth-key": token})
+response = requests.get(url, headers={"auth-key": fake})
 print('second...',response.text)
 
 # 特点：实现了动态key；但是请求被截获后，他人直接用这个token就可以发送请求

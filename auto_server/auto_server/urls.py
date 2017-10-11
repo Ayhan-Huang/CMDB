@@ -15,9 +15,12 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from api import urls
+from api import urls as api_urls
+from web import urls as web_urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^api/', include(urls))
+    url(r'^api/', include(api_urls)),
+    url(r'^', include(web_urls))  # 为空，走web路由
+    # 路由分发不能加$, 否则终止了
 ]

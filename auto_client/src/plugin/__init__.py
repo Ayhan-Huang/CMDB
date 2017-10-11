@@ -55,7 +55,7 @@ class Plugin(object):
         """
         if self.mode == 'AGENT':
             res = subprocess.getoutput(cmd)
-        elif self.mode == 'SSH':
+        elif self.mode == 'SSH': # paramiko进行SSH连接，执行命令
             pass
         elif self.mode == 'SALTSTACK':
             pass

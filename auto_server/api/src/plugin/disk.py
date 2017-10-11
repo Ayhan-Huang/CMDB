@@ -40,7 +40,7 @@ class Disk:
         record_list = []
         for slot in new_slots:
             new_disk = latest_disk_dict[slot]
-            disk_obj = models.Disk(**new_disk)
+            disk_obj = models.Disk(**new_disk)  # 汇报过来的数据格式处理成与model一样的字段，方便创建记录
             disk_obj.server_obj = self.server_obj
             disk_list.append(disk_obj)
             record = '[{server}]新增磁盘，槽位为[{slot}]'.format(
