@@ -56,8 +56,36 @@
 
 <script src="{% static 'plugins/jquery-3.2.1.js' %}"></script>
 <script src="{% static 'js/Papa_func.js' %}"></script>
+<script src="{% static 'js/King_func.js' %}"></script>
 <script>
-    f1();
+    //第一种方式：普通函数封装
+    //f1();
+
+    //第二种方式：自执行函数 + jQuery扩展
+    //思路：导入King_func.js时，其中定义的自执行函数立即执行；
+    // 它接收jQuery全局对象作为参数，在内部定义一个jQuery扩展方法；
+    // 然后通过jQuery/$ 调用该方法
+    $.King_func('/server_json.html')
+
+    /*
+      //自执行函数，函数无名子，加括号传参会立即执行
+    (function (args) {
+        alert(args)
+    })(666);
+
+    //如果不需要立即执行的特性，利用jQuery扩展特性，为jQuery定义一个方法
+    jQuery.extend({
+        'myMethod': function (args) {
+            alert(args)
+        }
+    });
+
+    $(function () {
+        $.myMethod(777);
+    })
+     */
+
+
 
 </script>
 
