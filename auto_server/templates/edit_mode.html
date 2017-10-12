@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<h1>编辑模式测试</h1>
+
+<button id="all">全选</button>
+<button id="reverse">反选</button>
+<button id="cancel">取消</button>
+<button id="editMode">进入编辑模式</button>
+<button id="save">保存</button>
+<button id="exit">退出编辑模式</button>
+<hr>
+<table border="1">
+    <thead>
+    <tr>
+        <th>选择</th>
+        <th>id</th>
+        <th>姓名</th>
+        <th>性别</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td><input type="checkbox"></td>
+        <td>1</td>
+        <td>张三</td>
+        <td>男</td>
+    </tr>
+    <tr>
+        <td><input type="checkbox"></td>
+        <td>2</td>
+        <td>帮主</td>
+        <td>未知</td>
+    </tr>
+    <tr>
+        <td><input type="checkbox"></td>
+        <td>3</td>
+        <td>如花</td>
+        <td>女</td>
+    </tr>
+    </tbody>
+</table>
+
+<script src="jquery-3.2.1.js"></script>
+<script>
+    //目标，点击进入编辑模式， td变身input
+    //读取td值，放在input内； 性别项变为selected下拉
+    //
+
+    $('#all').click(function () {
+        $(":checkbox").prop("checked", true);
+    });
+
+    $("#cancel").click(function () {
+        $(":checkbox").prop("checked", false);
+    });
+
+    $("#reverse").click(function () {
+        $(":checkbox").each(function () {
+            $(this).prop("checked", !$(this).prop("checked"));
+        });
+    });
+
+    //编辑
+    $("#editMode").click(function () {
+        $(":checkbox").each(function () {
+            if ($(this).prop("checked")) {
+                //如果是选定状态，那么读取td值，td -> input
+                //alert(123);
+                var idEle = $(this).parent().next();
+                var id = idEle.html();
+                idEle.html("<input type='text'>");
+                idEle.children("input").val(id);
+
+                //var nameEle = idEle.next();
+                var nameEle = $(this).parent().next().next();
+                var name = nameEle.html();
+                nameEle.html("<input type='text'>");
+                nameEle.children("input").val(name);
+
+
+                //var sexEle = nameEle.next(); 如果通过一级级找，有依赖性，因为上一级元素进入编辑模式时被替换了
+                var sexEle = $(this).parent().next().next().next();
+                var sex = sexEle.html();
+                sexEle.html("<select><option>男</option><option>女</option><option>未知</option></select>");
+                $.each(sexEle.children().children(), function () {
+                    if ($(this).html() === sex) {
+                        $(this).attr("selected", "selected");
+                    }
+                });
+            }
+        });
+
+        /*
+        //保存
+        $("#save").click(function () {
+            //读取td内input的值，赋值给td
+            var newId = idEle.children().val();
+            alert('编辑后的id是'+newId);
+        });
+        */
+
+
+    })
+
+
+</script>
+
+</body>
+</html>

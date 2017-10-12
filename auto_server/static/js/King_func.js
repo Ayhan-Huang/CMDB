@@ -88,13 +88,14 @@
                     //undefined	2	c1.com	Parallels-1A 1B CB 3B 64 66 4B 13 86 B0 86 FF 7E 2B 20 30	linux	CentOS release 6.6 (Final) Kernel on an \m	运维	undefined
                     var format_dict = {};
                     $.each(dict.text.kwargs, function (k, v) { //第三层兼容前端选项和数据库字段显示  --> 字符串格式化
-                        if (v.substring(0,2) === '@@') { //定义：@@，则从静态字段中取出对应的状态说明
+                        if (v.substring(0, 2) === '@@') { //定义：@@，则从静态字段中取出对应的状态说明
                             var name = v.substring(2);  // name=server_status
                             var status_code = row_dict[name];  //status_code=1
                             var server_status_code_list = GLOBAL_CHOICES_DICT.server_status_code;
-                            $.each(server_status_code_list, function(index, list) {
+                            $.each(server_status_code_list, function (index, list) {
                                 if (list[0] === status_code) {
                                     format_dict[k] = list[1];
+                                    return false;
                                 }
                             })
                         } else if (v[0] === '@') {   //定义，如果是以@开头，那么就表示格式化tpl时，用@后面的字段查询数据库的结果；否则，直接用字符串格式化
@@ -109,7 +110,11 @@
 
                     //为td增加属性
                     $.each(dict.attr, function (attr, val) {
-                       td.setAttribute(attr, val);
+                        if (val[0] === '@') {
+                            var name = val.substring(1);
+                            val = row_dict[name];
+                        }
+                        td.setAttribute(attr, val);
                     });
 
                     $(tr).append(td); // jQuery直接包dom对象
@@ -208,3 +213,26 @@
  name.format(kwargs);
  */
 
+// (function () {
+//     function init() {
+//         console.log('execute init...')
+//     }
+//     init();
+// })();
+
+(function (jq) {
+
+    function init() {
+        console.log('do something');
+    }
+
+    jq.extend({
+        'myMethod': function () {
+            init();
+        }
+    })
+})(jQuery);
+
+$(function () {
+    $.myMethod(777);
+});
