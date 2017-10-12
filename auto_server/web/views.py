@@ -19,41 +19,49 @@ def server_json(request):
         {
             'q': None,
             'title': '选择',
+            'display': True,
             'text': {'tpl': '<input type="checkbox" value={id}>', 'kwargs': {'id': '@id'}},
         },
         {
             'q': 'id',
             'title': 'ID',
+            'display': False,
             'text': {'tpl': '{a1}', 'kwargs': {'a1': '@id'}},
         },
         {
             'q': "hostname",
             'title': '主机名',
+            'display': True,
             'text': {'tpl': '{a1}', 'kwargs': {'a1': '@hostname'}},
         },
         {
             'q': "sn",
             'title': '序列号',
+            'display': True,
             'text': {'tpl': '{a1}', 'kwargs': {'a1': '@sn'}},
         },
         {
             'q': "os_platform",
             'title': '系统',
+            'display': True,
             'text': {'tpl': '{a1}-{a2}', 'kwargs': {'a1': '@os_platform', 'a2': '测试前端@分离'}},
         },
         {
             'q': "os_version",
             'title': '系统版本',
+            'display': True,
             'text': {'tpl': '{a1}', 'kwargs': {'a1': '@os_version'}},
         },
         {
             'q': "business_unit__name",
             'title': '业务线',
+            'display': True,
             'text': {'tpl': '{a1}', 'kwargs': {'a1': '@business_unit__name'}},
         },
         {
             'q': None,
             'title': '操作',
+            'display': True,
             'text': {'tpl': '<a href="/edit/{id}/">编辑</a> | <a href=/del/{id}/>删除</a>', 'kwargs': {'id': '@id'}},
         },
 
