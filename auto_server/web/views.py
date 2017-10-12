@@ -15,7 +15,7 @@ def server_json(request):
 
     table_config = [
         # q: 数据库查询字段； title: 前端表头； text: 前端表内容
-        # text: tpl 字符串模板， kwargs用于替换的内容
+        # text: tpl 含占位符的字符串模板， kwargs用于替换的内容，如果@开头，用@分离的数据库字段查询结果替换占位符，否则直接替换
         {
             'q': None,
             'title': '选择',
@@ -74,6 +74,7 @@ def server_json(request):
 
     return JsonResponse(response)
     # 相当于return HttpResponse(json.dumps(response))
+    # JsonResponse如果接收列表，默认会报错，因为列表不规范，没有key，不能包含状态等详细信息。
 
 
 def disk(request):
