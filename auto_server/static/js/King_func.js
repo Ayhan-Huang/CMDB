@@ -7,6 +7,7 @@
 (function (jq) {
 
     var requestUrl = "";
+    var GLOBAL_CHOICES_DICT = {};
 
     //定义原型，令所有的String对象都有format方法
     String.prototype.format = function (args) {
@@ -25,8 +26,8 @@
             data: {},
             dataType: 'JSON',
             success: function (response) {
-                console.log(response.table_config);
-                console.log(response.data_list);
+                console.log(response.global_choices_dict);
+                initGCD(response.global_choices_dict);
                 initTableHead(response.table_config);
                 initTableBody(response.table_config, response.data_list);
                 // 去除loading效果
@@ -39,11 +40,16 @@
         })
     }
 
+    //初始化GLOBAL_CHOICES_DICT
+    function initGCD(global_choices_dict) {
+        GLOBAL_CHOICES_DICT = global_choices_dict;
+    }
+
     // 填充表头
     function initTableHead(table_config) {
         $('#tableThead').children("tr").empty();  //因为如果再次调用init()那么会导致表头重复添加，因此，每次都执行清空表头
         $.each(table_config, function (index, conf) {
-            if (conf.display) {
+            if (conf.display) { //决定是否显示
                 var th = document.createElement('th');
                 th.innerHTML = conf.title;
                 console.log(conf.title);
@@ -82,9 +88,17 @@
                     //undefined	2	c1.com	Parallels-1A 1B CB 3B 64 66 4B 13 86 B0 86 FF 7E 2B 20 30	linux	CentOS release 6.6 (Final) Kernel on an \m	运维	undefined
                     var format_dict = {};
                     $.each(dict.text.kwargs, function (k, v) { //第三层兼容前端选项和数据库字段显示  --> 字符串格式化
-                        if (v[0] == '@') {   //定义，如果是以@开头，那么就表示格式化tpl时，用@后面的字段查询数据库的结果；否则，直接用字符串格式化
+                        if (v.substring(0,2) === '@@') { //定义：@@，则从静态字段中取出对应的状态说明
+                            var name = v.substring(2);  // name=server_status
+                            var status_code = row_dict[name];  //status_code=1
+                            var server_status_code_list = GLOBAL_CHOICES_DICT.server_status_code;
+                            $.each(server_status_code_list, function(index, list) {
+                                if (list[0] === status_code) {
+                                    format_dict[k] = list[1];
+                                }
+                            })
+                        } else if (v[0] === '@') {   //定义，如果是以@开头，那么就表示格式化tpl时，用@后面的字段查询数据库的结果；否则，直接用字符串格式化
                             var name = v.substring(1);
-                            console.log('name is ' + name);
                             format_dict[k] = row_dict[name]
                         } else {
                             format_dict[k] = v;
@@ -100,6 +114,7 @@
         })
     }
 
+    //通过jQuery扩展暴露一个调用接口
     jq.extend({
         'King_func': function (url) {
             requestUrl = url;

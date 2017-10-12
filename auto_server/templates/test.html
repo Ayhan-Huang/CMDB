@@ -5,27 +5,18 @@
     <title>Title</title>
 </head>
 <body>
-<h1>测试自执行函数</h1>
+<h1>传入生成器到模板循环</h1>
+
+<ul>
+    {% for server in server_list %}
+        <li>{{ server.hostname }}== {{ server.server_status_id_name }}</li>
+{% endfor %}
+</ul>
+
 
 
 <script src="/static/plugins/jquery-3.2.1.js"></script>
 <script>
-    //自执行函数，函数无名子，加括号传参会立即执行
-    //(function(args){
-    //    alert(args)
-    //})(666);
-
-    //如果不需要立即执行的特性，利用jQuery扩展特性，为jQuery定义一个方法
-    jQuery.extend({
-        'myMethod': function(args) {
-            alert(args)
-        }
-    });
-
-    $(function() {
-        $.myMethod(777);
-    })
-
 
 </script>
 

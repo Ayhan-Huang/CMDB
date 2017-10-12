@@ -7,4 +7,6 @@ urlpatterns = [
 
     url(r'^disk.html$', views.disk),
     url(r'^disk_json.html$', views.disk_json),
+
+    url(r'test.html/', views.test),
 ]

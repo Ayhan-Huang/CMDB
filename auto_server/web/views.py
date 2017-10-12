@@ -21,48 +21,64 @@ def server_json(request):
             'title': '选择',
             'display': True,
             'text': {'tpl': '<input type="checkbox" value={id}>', 'kwargs': {'id': '@id'}},
+            'attr': {'edit': True, 'origin': '@id'}
         },
         {
             'q': 'id',
             'title': 'ID',
             'display': False,
             'text': {'tpl': '{a1}', 'kwargs': {'a1': '@id'}},
+            'attr': {'edit': True, 'origin': '@id'}
         },
         {
             'q': "hostname",
             'title': '主机名',
             'display': True,
             'text': {'tpl': '{a1}', 'kwargs': {'a1': '@hostname'}},
+            'attr': {'edit': False, 'origin': '@id'}
         },
         {
             'q': "sn",
             'title': '序列号',
             'display': True,
             'text': {'tpl': '{a1}', 'kwargs': {'a1': '@sn'}},
+            'attr': {'edit': False, 'origin': '@id'}
         },
         {
             'q': "os_platform",
             'title': '系统',
             'display': True,
             'text': {'tpl': '{a1}-{a2}', 'kwargs': {'a1': '@os_platform', 'a2': '测试前端@分离'}},
+            'attr': {'edit': True, 'origin': '@id'}
         },
         {
             'q': "os_version",
             'title': '系统版本',
             'display': True,
             'text': {'tpl': '{a1}', 'kwargs': {'a1': '@os_version'}},
+            'attr': {'edit': True, 'origin': '@id'}
         },
         {
             'q': "business_unit__name",
             'title': '业务线',
             'display': True,
             'text': {'tpl': '{a1}', 'kwargs': {'a1': '@business_unit__name'}},
+            'attr': {'edit': True, 'origin': '@id'}
+        },
+        {
+            'q': "server_status",
+            'title': '状态',
+            'display': True,
+            'text': {'tpl': '{a1}', 'kwargs': {'a1': '@@server_status'}},
+            # 定义：前端检测到@@，则从静态字段中取出对应的状态说明
+            'attr': {'edit': True, 'origin': '@id'}
         },
         {
             'q': None,
             'title': '操作',
             'display': True,
             'text': {'tpl': '<a href="/edit/{id}/">编辑</a> | <a href=/del/{id}/>删除</a>', 'kwargs': {'id': '@id'}},
+            'attr': {'edit': True, 'origin': '@id'}
         },
 
     ]
@@ -77,7 +93,10 @@ def server_json(request):
 
     response = {
         'data_list': list(server_list), # QuerySet对象处理为可json对象
-        'table_config': table_config
+        'table_config': table_config,
+        'global_choices_dict': {
+            'server_status_code': models.Server.server_status_code,  # 静态字段可能不止一个，因此用一个大字典封装
+        }
     }
 
     return JsonResponse(response)
@@ -150,5 +169,17 @@ def disk_json(request):
     return JsonResponse(response)
 
 
+
+def xx(server_list):
+    for row in server_list:
+        for item in models.Server.server_status_code:
+            if item[0] == row['server_status']:
+                row['server_status_id_name'] = item[1]
+                break
+        yield row
+
+def test(request):
+    server_list = models.Server.objects.all().values('hostname', 'server_status')
+    return render(request, 'test.html', {'server_list': xx(server_list)})
 
 

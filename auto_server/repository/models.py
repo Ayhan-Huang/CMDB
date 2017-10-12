@@ -117,7 +117,7 @@ class Server(models.Model):
         (3, '离线'),
         (4, '下架'),
     )
-    server_status = models.IntegerField(choices=server_status_code, default=1)
+    server_status = models.IntegerField('状态', choices=server_status_code, default=1)
 
     hostname = models.CharField(max_length=128, unique=True)
     sn = models.CharField('SN号', max_length=64, db_index=True)
