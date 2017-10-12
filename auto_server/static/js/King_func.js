@@ -106,6 +106,12 @@
                     });
 
                     td.innerHTML = dict.text.tpl.format(format_dict);
+
+                    //为td增加属性
+                    $.each(dict.attr, function (attr, val) {
+                       td.setAttribute(attr, val);
+                    });
+
                     $(tr).append(td); // jQuery直接包dom对象
                 }
             });
