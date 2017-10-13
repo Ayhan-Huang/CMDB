@@ -22,7 +22,8 @@
         .loading .img {
             height: 32px;
             width: 32px;
-            background: url('/static/img/1_ayhan_huang.jpg');
+{#            background: url('/static/img/1_ayhan_huang.jpg');#}
+            background: url('/static/img/loading.gif');
             position: fixed;
             left: 50%;
             top: 50%;
@@ -37,6 +38,7 @@
 <body>
 <div class="container">
     <h1>服务器列表</h1>
+    <!-- 数据开始 -->
     <table class="table table-bordered">
         <thead id="tableThead">
         <tr>
@@ -48,11 +50,18 @@
 
         </tbody>
     </table>
+    <!-- 数据结束 -->
+
+    <!-- 分页开始，注意这里用的是bootstrap的css，请勿更改属性id -->
+    <ul id="pagination" class="pagination"></ul>
+    <!-- 分页结束 -->
 </div>
 
+<!-- 模态加载动画框开始 -->
 <div id="loading" class="loading hide">
     <div class="img"></div>
 </div>
+<!-- 模态加载动画框结束 -->
 
 <script src="{% static 'plugins/jquery-3.2.1.js' %}"></script>
 {#<script src="{% static 'js/analyze.js' %}"></script>#}

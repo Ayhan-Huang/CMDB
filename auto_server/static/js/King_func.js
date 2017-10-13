@@ -16,20 +16,20 @@
         });
     };
 
-    function init() {
+    function init(pageNum) {
         $('#loading').removeClass('hide'); //去除loading模态框隐藏
 
         //页面加载之后AJAX从/server_json.html请求数据，渲染页面
         $.ajax({
             url: requestUrl,
             type: 'GET',
-            data: {},
+            data: {'pageNum': pageNum},
             dataType: 'JSON',
             success: function (response) {
-                console.log(response.global_choices_dict);
                 initGCD(response.global_choices_dict);
                 initTableHead(response.table_config);
                 initTableBody(response.table_config, response.data_list);
+                initPagination(response.page_html);
                 // 去除loading效果
                 $('#loading').addClass('hide');
             },
@@ -61,6 +61,7 @@
 
     //填充表数据
     function initTableBody(table_config, data_list) {
+        $('#tableBody').empty(); //清空数据，否则点击翻页内容会叠加
         /*
          data_list = [
          {'hostname': xxx, 'sn': xxx, 'os": xxx}  --> row_dict
@@ -125,11 +126,28 @@
         })
     }
 
+    //初始化分页
+    function initPagination(page_html) {
+        //清空页面的分页内容，重新添加分页
+        console.log(page_html);
+        $('#pagination').empty().append(page_html);
+
+        //为页码a标签绑定事件
+        $('#pagination').on('click','a', function () {
+            var pageNum = $(this).attr("num");
+            $.changePage(pageNum);
+        })
+    }
+
     //通过jQuery扩展暴露一个调用接口
     jq.extend({
         'King_func': function (url) {
             requestUrl = url;
             init();
+        },
+
+        'changePage': function (pageNum) {
+            init(pageNum);
         }
     });
 
@@ -213,26 +231,3 @@
  name.format(kwargs);
  */
 
-// (function () {
-//     function init() {
-//         console.log('execute init...')
-//     }
-//     init();
-// })();
-
-(function (jq) {
-
-    function init() {
-        console.log('do something');
-    }
-
-    jq.extend({
-        'myMethod': function () {
-            init();
-        }
-    })
-})(jQuery);
-
-$(function () {
-    $.myMethod(777);
-});

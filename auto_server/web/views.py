@@ -1,7 +1,10 @@
 from django.shortcuts import render
 from repository import models
 from django.http import JsonResponse
+from utils.page import Pagination
 
+# superuser: root
+# pwd:root!234
 
 def server(request):
     return render(request, 'server.html')
@@ -89,14 +92,22 @@ def server_json(request):
         if item['q']:
             fields.append(item['q'])
 
-    server_list = models.Server.objects.values(*fields)
+    # 获取请求页码并实例化分页器
+    current_page = request.GET.get('pageNum')
+    total_item_count = models.Server.objects.all().count()
+    paginator = Pagination(current_page=current_page,
+                           total_item_count=total_item_count,
+                           per_page_count=2)
+
+    server_list = models.Server.objects.values(*fields)[paginator.start: paginator.end]
 
     response = {
         'data_list': list(server_list), # QuerySet对象处理为可json对象
         'table_config': table_config,
         'global_choices_dict': {
             'server_status_code': models.Server.server_status_code,  # 静态字段可能不止一个，因此用一个大字典封装
-        }
+        },
+        'page_html': paginator.page_html_js()
     }
 
     return JsonResponse(response)
