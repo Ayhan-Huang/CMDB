@@ -2,9 +2,12 @@ from django.shortcuts import render
 from repository import models
 from django.http import JsonResponse
 from utils.page import Pagination
+from django.db.models import Q
+import json
 
 # superuser: root
 # pwd:root!234
+
 
 def server(request):
     return render(request, 'server.html')
@@ -14,8 +17,18 @@ def server_json(request):
     # 从数据库取服务器列表
     import time
     # 模拟网络延时
-    time.sleep(0.5)
+    #time.sleep(0.5)
 
+    # 前端搜索配置
+    search_config = [
+        {'name': 'server_status', 'title': '状态', 'type': 'select', 'choice_name': 'server_status_code'},
+        {'name': 'hostname__contains', 'title': '主机名', 'type': 'input'},
+        {'name': 'cabinet_num', 'title': '机柜号', 'type': 'input'},
+        # type键用于前端判断搜索框类型
+        # 对于下拉框类型，提供choice_name键，以便前端从response.global_choices_dict.choice_name中获取静态字段
+    ]
+
+    # 前端table数据展示配置
     table_config = [
         # q: 数据库查询字段； title: 前端表头； text: 前端表内容
         # text: tpl 含占位符的字符串模板， kwargs用于替换的内容，如果@开头，用@分离的数据库字段查询结果替换占位符，否则直接替换
@@ -99,11 +112,24 @@ def server_json(request):
                            total_item_count=total_item_count,
                            per_page_count=2)
 
-    server_list = models.Server.objects.values(*fields)[paginator.start: paginator.end]
+    # 利用Q对象，进行组合搜索
+    search_conditions = json.loads(request.GET.get('searchConditions'))
+    # {'server_status': ['1', '2', '3'], 'hostname__contains': ['c1.com', 'c3', 'c4']}
+    query = Q()
+    for k, v in search_conditions.items():
+        # k: AND;  for i in v: OR
+        temp = Q()
+        temp.connector = 'OR'
+        for i in v:
+            temp.children.append((k, i))
+        query.add(temp, 'AND')
+
+    server_list = models.Server.objects.filter(query).values(*fields)[paginator.start: paginator.end]
 
     response = {
-        'data_list': list(server_list), # QuerySet对象处理为可json对象
+        'data_list': list(server_list),  # QuerySet对象处理为可json对象
         'table_config': table_config,
+        'search_config': search_config,
         'global_choices_dict': {
             'server_status_code': models.Server.server_status_code,  # 静态字段可能不止一个，因此用一个大字典封装
         },

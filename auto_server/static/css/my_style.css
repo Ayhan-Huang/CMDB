@@ -1,0 +1,63 @@
+/*  模态框样式 开始 */
+/*  模态框样式 */
+.loading {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background-color: white;
+    opacity: 0.4;
+    z-index: 1000;
+}
+
+/* 动图样式 */
+.loading .gif {
+    height: 32px;
+    width: 32px;
+    background: url('/static/img/loading.gif');
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    margin-left: -16px;
+    margin-top: -16px;
+    z-index: 1001;
+}
+/*  模态框样式 结束 */
+
+
+/* 组合搜索样式  开始*/
+/* 搜索按钮对组合搜索区进行相对定位 */
+.search-area {
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.search-btn {
+    position: absolute;
+    left: 10px;
+    bottom: 1px;
+}
+
+/* icons 搜索选项 输入框 */
+#searchCondition .condition {
+    position: relative;
+    height: 35px;
+}
+
+#searchCondition .condition .icons {
+    position: absolute;
+    left: 0;
+    width: 35px;
+    height: 35px;
+}
+
+#searchCondition .condition .input-group {
+    position: absolute;
+    left: 35px;
+    right: 0;
+    height: 35px;
+}
+/* 组合搜索样式  结束*/
+
+

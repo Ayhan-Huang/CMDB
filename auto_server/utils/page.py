@@ -32,6 +32,7 @@ class Pagination(object):
         """
         try:
             current_page = int(current_page)
+            # 处理字符串类型/空页码
         except Exception as e:
             current_page = 1
         self.current_page = current_page
@@ -108,15 +109,59 @@ class Pagination(object):
 
         return mark_safe(''.join(page_list))
 
+    # def page_html_js(self):
+    #     # 给前端JS，由前端生成页码
+    #     page_list = []
+    #
+    #     if self.current_page == 1:
+    #         prev = ' <li><a href="#">上一页</a></li>'
+    #     else:
+    #         prev = ' <li><a num="{page}">上一页</a></li>'.format(page=self.current_page-1)
+    #         # <a num="{page}"> 将页码作为a标签的属性，前端为a标签绑定方法：拿到属性值，执行翻页
+    #     page_list.append(prev)
+    #
+    #     half_show_pager_count = int(self.show_pager_count / 2)
+    #
+    #     # 数据特别少，15条数据=2页
+    #     if self.max_pager_num < self.show_pager_count:
+    #         # 页码小于11
+    #         pager_start = 1
+    #         pager_end = self.max_pager_num + 1
+    #     else:
+    #         if self.current_page <= half_show_pager_count:
+    #             pager_start = 1
+    #             pager_end = self.show_pager_count + 1
+    #         else:
+    #             if self.current_page + half_show_pager_count > self.max_pager_num:
+    #                 pager_start = self.max_pager_num - self.show_pager_count + 1
+    #                 pager_end = self.max_pager_num + 1
+    #             else:
+    #                 pager_start = self.current_page - half_show_pager_count
+    #                 pager_end = self.current_page + half_show_pager_count + 1
+    #
+    #     for i in range(pager_start, pager_end):
+    #         if i == self.current_page:
+    #             tpl = ' <li class="active"><a num="{page}"  >{page}</a></li>'.format(page=i)
+    #         else:
+    #             tpl = ' <li><a num="{page}" >{page}</a></li>'.format(page=i)
+    #         page_list.append(tpl)
+    #
+    #     if self.current_page == self.max_pager_num:
+    #         nex = ' <li><a href="#">下一页</a></li>'
+    #     else:
+    #         nex = ' <li><a num="{page}">下一页</a></li>'.format(page=self.current_page+1)
+    #     page_list.append(nex)
+    #
+    #     return ''.join(page_list)
+    #     # 因为数据不是传到模板，而是传给前端JS处理，因此不需要mark_safe
+
     def page_html_js(self):
-        # 给前端JS，由前端生成页码
         page_list = []
 
         if self.current_page == 1:
             prev = ' <li><a href="#">上一页</a></li>'
         else:
-            prev = ' <li><a num="{page}">上一页</a></li>'.format(page=self.current_page-1)
-            # <a num="{page}"> 将页码作为a标签的属性，前端为a标签绑定方法：拿到属性值，执行翻页
+            prev = ' <li><a onclick="$.changePage(%s)">上一页</a></li>' %(self.current_page-1,)
         page_list.append(prev)
 
         half_show_pager_count = int(self.show_pager_count / 2)
@@ -140,16 +185,15 @@ class Pagination(object):
 
         for i in range(pager_start, pager_end):
             if i == self.current_page:
-                tpl = ' <li class="active"><a num="{page}"  >{page}</a></li>'.format(page=i)
+                tpl = ' <li class="active"><a onclick="$.changePage(%s)"  >%s</a></li>' % (i,i,)
             else:
-                tpl = ' <li><a num="{page}" >{page}</a></li>'.format(page=i)
+                tpl = ' <li><a onclick="$.changePage(%s)" >%s</a></li>' % (i, i,)
             page_list.append(tpl)
 
         if self.current_page == self.max_pager_num:
             nex = ' <li><a href="#">下一页</a></li>'
         else:
-            nex = ' <li><a num="{page}">下一页</a></li>'.format(page=self.current_page+1)
+            nex = ' <li><a onclick="$.changePage(%s)" >下一页</a></li>' %(self.current_page+1,)
         page_list.append(nex)
 
         return ''.join(page_list)
-        # 因为数据不是传到模板，而是传给前端JS处理，因此不需要mark_safe

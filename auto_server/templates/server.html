@@ -4,40 +4,68 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <!-- 导入bootstrap css -->
     <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.3.7/dist/css/bootstrap.css' %}">
+    <!-- 导入 font-awesome css-->
+    <link rel="stylesheet" href="{% static 'plugins/font-awesome-4.7.0/css/font-awesome.css' %}">
+    <!-- 导入自定义css -->
+    <link rel="stylesheet" href="{% static 'css/my_style.css' %}">
 
-    <style>
-        {# 设置加载模态框 #}
-        .loading {
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            right: 0;
-            left: 0;
-            background-color: white;
-            opacity: 0.4;
-            z-index: 1000;
-        }
+    <!-- 导入jquery -->
+    <script src="{% static 'plugins/jquery-3.2.1.js' %}"></script>
+    <!-- 导入bootstrap js -->
+    <script src="{% static 'plugins/bootstrap-3.3.7/dist/js/bootstrap.js' %}"></script>
+    <!-- 导入自定义 js -->
+    {#<script src="{% static 'js/analyze.js' %}"></script>#}
+    {#<script src="{% static 'js/Papa_func.js' %}"></script>#}
+    <script src="{% static 'js/King_func.js' %}"></script>
 
-        .loading .img {
-            height: 32px;
-            width: 32px;
-{#            background: url('/static/img/1_ayhan_huang.jpg');#}
-            background: url('/static/img/loading.gif');
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            margin-left: -16px;
-            margin-top: -16px;
-            z-index: 1001;
-        }
+    <script>
+        // 第一种方式：普通函数封装
+        //f1();
 
-    </style>
+        //第二种方式：自执行函数 + jQuery扩展
+        $(function () {
+            $.King_func('/server_json.html');
+        });
+
+    </script>
 
 </head>
 <body>
 <div class="container">
     <h1>服务器列表</h1>
+
+    <!-- 组合搜索开始 -->
+    <div class="search-area clearfix">
+        <div id="searchCondition" class="search-condition col-md-offset-2 col-md-8">
+            <!-- 单个搜索条件 开始 -->
+            <div class="condition">
+                <div class="icons">
+                    <a class="btn btn-default add-condition">
+                        <i class="fa fa-plus-square"></i>
+                    </a>
+                </div>
+                <div class="input-group">
+                    <div class="input-group-btn">
+                        <label class="btn btn-default no-radius" type="button" style="width: 100px; height: 34px"></label>
+                        <button type="button" class="btn btn-default dropdown-toggle no-border-r" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
+                        <ul class="dropdown-menu">
+                            <!-- 搜索下拉菜单li标签由JS生成 -->
+                        </ul>
+                    </div>
+                    <!-- 搜索输入框，由JS生成： <input> / <select> -->
+                </div>
+            </div>
+        </div>
+
+        <div class="search-btn col-md-offset-10 col-md-2">
+            <a id="doSearch" class="btn btn-primary">搜索</a>
+        </div>
+    </div>
+    <!-- 组合搜索结束 -->
+
     <!-- 数据开始 -->
     <table class="table table-bordered">
         <thead id="tableThead">
@@ -52,52 +80,15 @@
     </table>
     <!-- 数据结束 -->
 
-    <!-- 分页开始，注意这里用的是bootstrap的css，请勿更改属性id -->
+    <!-- 分页开始，注意这里用的是bootstrap样式，请勿更改class, id -->
     <ul id="pagination" class="pagination"></ul>
     <!-- 分页结束 -->
 </div>
 
 <!-- 模态加载动画框开始 -->
 <div id="loading" class="loading hide">
-    <div class="img"></div>
+    <div class="gif"></div>
 </div>
 <!-- 模态加载动画框结束 -->
-
-<script src="{% static 'plugins/jquery-3.2.1.js' %}"></script>
-{#<script src="{% static 'js/analyze.js' %}"></script>#}
-{#<script src="{% static 'js/Papa_func.js' %}"></script>#}
-<script src="{% static 'js/King_func.js' %}"></script>
-<script>
-    // 第一种方式：普通函数封装
-    //f1();
-
-    //第二种方式：自执行函数 + jQuery扩展
-    //思路：导入King_func.js时，其中定义的自执行函数立即执行；
-    // 它接收jQuery全局对象作为参数，在内部定义一个jQuery扩展方法；
-    // 然后通过jQuery/$ 调用该方法
-    $.King_func('/server_json.html')
-
-
-    /*
-      //自执行函数，函数无名字，加括号传参会立即执行
-    (function (args) {
-        alert(args)
-    })(666);
-
-    //如果不需要立即执行的特性，利用jQuery扩展特性，为jQuery定义一个方法
-    jQuery.extend({
-        'myMethod': function (args) {
-            alert(args)
-        }
-    });
-
-    $(function () {
-        $.myMethod(777);
-    })
-     */
-
-</script>
-
-
 </body>
 </html>
