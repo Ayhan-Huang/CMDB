@@ -34,7 +34,6 @@
                 initTableBody(response.table_config, response.data_list);
                 initPagination(response.page_html);
                 initSearch(response.search_config);
-                bindSearchEvent();
                 // 去除loading效果
                 $('#loading').addClass('hide');
             },
@@ -227,7 +226,7 @@
         //注意，不要用$对象调用DOM对象的方法；除非$_obj[0]拿到DOM对象
     }
 
-    //绑定搜索相关的事件
+    //绑定搜索相关的事件。注意：不要放在init中执行，否则每次翻页或搜索会导致重复绑定。
     function bindSearchEvent() {
         console.log('执行了搜索相关绑定');
         //点击dropdown-menu，更改label显示 以及 重建输入框(根据下拉选项类型决定重建类型input/select)
@@ -293,6 +292,12 @@
         $('#doSearch').click(function () {
             //点击搜索，将搜索条件发送给server, 还要走init，因此；直接在init中执行一个函数获取搜索条件，发送给服务端
            init(1);
+        });
+
+        //绑定翻页事件
+        $('#pagination').on('click', 'a', function () {
+            var pageNum = $(this).attr("num");
+            init(pageNum);
         })
 
     }
@@ -319,12 +324,14 @@
     jq.extend({
         'King_func': function (url) {
             requestUrl = url;
-            init(1);
+            init();
+            bindSearchEvent();
         },
-
+        /*
         'changePage': function (pageNum) {
             init(pageNum);
         }
+        */
     });
 
 })(jQuery);
