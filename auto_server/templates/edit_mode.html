@@ -12,7 +12,9 @@
 <button id="reverse">反选</button>
 <button id="cancel">取消</button>
 <button id="editMode">进入编辑模式</button>
+<!--
 <button id="save">保存</button>
+-->
 <button id="exit">退出编辑模式</button>
 <hr>
 <table border="1">
@@ -66,48 +68,83 @@
         });
     });
 
+    var sex_choice = [
+        [1, '男'],
+        [2, '女'],
+        [3, '未知'],
+    ];
+
     //编辑
     $("#editMode").click(function () {
         $(":checkbox").each(function () {
             if ($(this).prop("checked")) {
                 //如果是选定状态，那么读取td值，td -> input
                 //alert(123);
-                var idEle = $(this).parent().next();
-                var id = idEle.html();
-                idEle.html("<input type='text'>");
-                idEle.children("input").val(id);
+                var idTd = $(this).parent().next();
+                var id = idTd.html();
+                idTd.html("<input type='text'>");
+                idTd.children("input").val(id);
 
-                //var nameEle = idEle.next();
-                var nameEle = $(this).parent().next().next();
-                var name = nameEle.html();
-                nameEle.html("<input type='text'>");
-                nameEle.children("input").val(name);
+                //var nameTd = idTd.next();
+                var nameTd = $(this).parent().next().next();
+                var name = nameTd.html();
+                nameTd.html("<input type='text'>");
+                nameTd.children("input").val(name);
 
 
-                //var sexEle = nameEle.next(); 如果通过一级级找，有依赖性，因为上一级元素进入编辑模式时被替换了
-                var sexEle = $(this).parent().next().next().next();
-                var sex = sexEle.html();
-                sexEle.html("<select><option>男</option><option>女</option><option>未知</option></select>");
-                $.each(sexEle.children().children(), function () {
+                //var sexTd = nameTd.next(); 如果通过一级级找，有依赖性，因为上一级元素进入编辑模式时被替换了
+                var sexTd = $(this).parent().next().next().next();
+                var sex = sexTd.html();
+                sexTd.html("<select><option>男</option><option>女</option><option>未知</option></select>");
+                //显示默认值
+                $.each(sexTd.children().children(), function () {
                     if ($(this).html() === sex) {
                         $(this).attr("selected", "selected");
                     }
                 });
+                //赋值value
+                $.each($(sexTd).children().children(), function() {
+                    var optEle = $(this);
+                    $.each(sex_choice, function () {
+                        if ($(this)[1] === optEle.text() ) {
+                            optEle.attr('value', $(this)[0]);
+                        }
+                    })
+                })
+
             }
         });
 
-        /*
-        //保存
-        $("#save").click(function () {
-            //读取td内input的值，赋值给td
-            var newId = idEle.children().val();
-            alert('编辑后的id是'+newId);
+    });
+
+    //退出编辑模式
+    $('#exit').click(function () {
+        //读取input/select值，赋值给td
+        $('table').find('[type="text"]').each(function () {
+            var val = $(this).val();
+            console.log(val);
+            var td = $(this).parent();
+            $(td).html(val);
         });
-        */
 
+        $('table').find('select').each(function () {
+            var val = $(this).val();
+            $.each(sex_choice, function () {
+                if (val == $(this)[0]) {
+                    val = $(this)[1];
+                    console.log('性别'+val);
+                }
+            });
+            var td = $(this).parent();
+            $(td).html(val);
+        })
+    });
 
-    })
-
+    //退出编辑模式
+    $('#exit').click(function () {
+        //点击之后，放弃更改
+        var a;
+    });
 
 </script>
 

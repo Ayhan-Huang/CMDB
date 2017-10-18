@@ -10,11 +10,17 @@
     <link rel="stylesheet" href="{% static 'plugins/font-awesome-4.7.0/css/font-awesome.css' %}">
     <!-- 导入自定义css -->
     <link rel="stylesheet" href="{% static 'css/my_style.css' %}">
+    <!-- 导入sweetalert css -->
+    <link rel="stylesheet" href="{%  static 'plugins/sweetalert-master/dist/sweetalert.css' %}">
 
     <!-- 导入jquery -->
     <script src="{% static 'plugins/jquery-3.2.1.js' %}"></script>
+    <!-- 导入jquery.cookie -->
+    <script src="{% static 'plugins/jquery.cookie.js' %}"></script>
     <!-- 导入bootstrap js -->
     <script src="{% static 'plugins/bootstrap-3.3.7/dist/js/bootstrap.js' %}"></script>
+    <!-- 导入sweetalert js -->
+    <script src="{% static 'plugins/sweetalert-master/dist/sweetalert-dev.js' %}"></script>
     <!-- 导入自定义 js -->
     {#<script src="{% static 'js/analyze.js' %}"></script>#}
     {#<script src="{% static 'js/Papa_func.js' %}"></script>#}
@@ -34,6 +40,9 @@
 </head>
 <body>
 <div class="container">
+
+    <div id="handleStatus" style="position: fixed;z-index: 9998;width: 500px;left:50%;margin-left:-250px;text-align: center;"></div>
+
     <h1>服务器列表</h1>
 
     <!-- 组合搜索开始 -->
@@ -48,7 +57,8 @@
                 </div>
                 <div class="input-group">
                     <div class="input-group-btn">
-                        <label class="btn btn-default no-radius" type="button" style="width: 100px; height: 34px"></label>
+                        <label class="btn btn-default no-radius" type="button"
+                               style="width: 100px; height: 34px"></label>
                         <button type="button" class="btn btn-default dropdown-toggle no-border-r" data-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
                         <ul class="dropdown-menu">
@@ -65,6 +75,18 @@
         </div>
     </div>
     <!-- 组合搜索结束 -->
+
+    <!-- 功能按钮开始 -->
+    <div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+      <a id="checkAll" class="btn btn-default">全选</a>
+      <a id="checkCancel" class="btn btn-default">取消</a>
+      <a id="checkReverse" class="btn btn-default">反选</a>
+      <a class="btn btn-default">添加</a>
+      <a id='delMulti' class="btn btn-default">删除</a>
+      <a id='saveMulti' class="btn btn-default">保存</a>
+      <a id="editModeStatus" class="btn btn-default">进入编辑模式</a>
+    </div>
+    <!-- 功能按钮结束 -->
 
     <!-- 数据开始 -->
     <table class="table table-bordered">

@@ -8,7 +8,22 @@
 
     var requestUrl = "";
     var GLOBAL_CHOICES_DICT = {};
+    
+    //ajax全局设置
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection  -- 正则匹配
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
 
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            // 请求头中设置一次csrf-token
+            if (!csrfSafeMethod(settings.type)) {
+                xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
+            }
+        }
+    });
+    
     //定义原型，令所有的String对象都有format方法
     String.prototype.format = function (args) {
         return this.replace(/\{(\w+)\}/g, function (s, i) {
@@ -136,11 +151,11 @@
         //为页码a标签绑定事件,这个事件执行jQuery扩展方法：
         // 因为代码被封装在自执行函数体内，通过jQuery扩展才能访问到
         /*
-        $('#pagination').on('click', 'a', function () {
-            var pageNum = $(this).attr("num");
-            $.changePage(pageNum);
-        })
-        */
+         $('#pagination').on('click', 'a', function () {
+         var pageNum = $(this).attr("num");
+         $.changePage(pageNum);
+         })
+         */
     }
 
     //初始化搜索
@@ -226,9 +241,11 @@
         //注意，不要用$对象调用DOM对象的方法；除非$_obj[0]拿到DOM对象
     }
 
-    //绑定搜索相关的事件。注意：不要放在init中执行，否则每次翻页或搜索会导致重复绑定。
-    function bindSearchEvent() {
-        console.log('执行了搜索相关绑定');
+    //绑定事件。注意：不要放在init中执行，否则每次翻页或搜索会导致重复绑定。
+    function bindEvent() {
+
+        /********************* 绑定搜索相关 开始 ***************************/
+
         //点击dropdown-menu，更改label显示 以及 重建输入框(根据下拉选项类型决定重建类型input/select)
         $('#searchCondition').on('click', 'li', function () {
             //修改label显示, 通过相对定位，否则搜索条件多了会找错
@@ -279,7 +296,7 @@
         $('.add-condition').click(function () {
             var $newCondition = $(this).parent().parent().clone();
             $newCondition.find('.add-condition').removeClass('add-condition').addClass('del-condition');
-            $newCondition.find('.fa-plus-square').attr('class','fa fa-minus-square');
+            $newCondition.find('.fa-plus-square').attr('class', 'fa fa-minus-square');
             $('#searchCondition').append($newCondition);
         });
 
@@ -291,16 +308,262 @@
         //点击搜索按钮
         $('#doSearch').click(function () {
             //点击搜索，将搜索条件发送给server, 还要走init，因此；直接在init中执行一个函数获取搜索条件，发送给服务端
-           init(1);
+            init(1);
         });
+
+
+        /********************* 绑定翻页 ***************************/
 
         //绑定翻页事件
         $('#pagination').on('click', 'a', function () {
             var pageNum = $(this).attr("num");
             init(pageNum);
+        });
+
+
+        /********************* 绑定编辑相关 开始 ***************************/
+
+        //绑定checkbox：点击进入/退出编辑：事件委派
+        $('#tableBody').on('click', '[type="checkbox"]', function () {
+            //如果当前如果当前编辑模式按钮激活，那么所在行进入编辑模式
+            if ($('#editModeStatus').hasClass('btn-warning')) {
+
+                //点击选择，根据td 的edit属性，决定是否进入编辑
+                //如果后台配置文件：edit=true
+                var $tr = $(this).parent().parent();
+                if ($(this).prop('checked')) {
+                    $tr.addClass('success'); //bootstrap css
+                    $.each($tr.children('td[edit="true"]'), function () {
+                        //td进行编辑模式
+                        tdEnterEditMode($(this));
+                    })
+
+                } else {
+                    //点击取消选择，退出编辑，td赋新值
+                    $tr.removeClass('success');
+                    $.each($tr.children('td[edit="true"]'), function () {
+                        tdExitEditMode($(this));
+                    });
+                }
+            }
+
+        });
+
+        //绑定编辑按钮：通过bootstrap btn-warning 样式，判断进入/退出编辑
+        $('#editModeStatus').click(function () {
+            if ($(this).hasClass('btn-warning')) {
+                // 如果btn-warning，说明点击完之后，要退出编辑模式   -- 有时候无法退出，似乎不是代码问题，自己又好了，浏览器问题? 项目重启？
+                $(this).removeClass('btn-warning');
+                $(this).text('进入编辑模式');
+                // $('#tableBody').find('[checked="checked"]').each(function () {
+                $('#tableBody').find('[type="checkbox"]').each(function () {
+                    if ($(this).prop('checked')) {
+                        // ----- 未执行以下
+                        console.log('tr退出拜年祭');
+                        var $tr = $(this).parent().parent();
+                        trExitEditMode($tr);
+                    }
+
+                });
+
+            } else {
+                // 进入编辑模式
+                $(this).addClass('btn-warning');
+                $(this).text('退出编辑模式');
+
+                $('#tableBody').find('[checked="checked"]').each(function () {
+                    var $tr = $(this).parent().parent();
+                    trEnterEditMode($tr);
+                });
+            }
+        });
+
+        //全选：如果当前编辑模式按钮激活，那么所在行进入编辑模式
+        $('#checkAll').click(function () {
+            //判断，没有选中的改为选中   -- 为什么不直接全部赋值选中？ -------------------------------------------------------？
+            $('#tableBody').find('[type="checkbox"]').each(function () {
+                console.log('全选');
+                if (!$(this).prop('checked')) {
+                    $(this).prop('checked', 'true');
+
+                    //判断，如果当前编辑模式按钮激活，那么所在行进入编辑模式
+                    if ($('#editModeStatus').hasClass('btn-warning')) {
+                        var $tr = $(this).parent().parent();
+                        trEnterEditMode($tr);
+                    }
+                }
+            });
+        });
+
+        //取消，如果当前编辑模式按钮激活，那么所在行退出编辑模式，
+        $('#checkCancel').click(function () {
+            $('#tableBody').find('[type="checkbox"]').each(function () {
+                $(this).prop('checked', false);
+
+                //判断，如果当前编辑模式按钮激活，那么所在行退出编辑模式
+                if ($('#editModeStatus').hasClass('btn-warning')) {
+                    var $tr = $(this).parent().parent();
+                    trExitEditMode($tr);
+                }
+            });
+        });
+
+        //反选
+        $('#checkReverse').click(function () {
+            $('#tableBody').find('[type="checkbox"]').each(function() {
+                if($(this).prop('checked')) {
+                    //已选中取消
+                    $(this).prop('checked', false);
+                    if ($('#editModeStatus').hasClass('btn-warning')) {
+                        var $tr = $(this).parent().parent();
+                        trExitEditMode($tr);
+                    }
+
+                } else {
+                    //选中
+                    $(this).prop('checked', true);
+                    if ($('#editModeStatus').hasClass('btn-warning')) {
+                        var $tr = $(this).parent().parent();
+                        trEnterEditMode($tr);
+                    }
+                }
+            })
+        });
+
+        //删除
+        $('#delMulti').click(function () {
+            // 显示模态对话框,二次确认
+            var ids = [];
+            var trs = [];
+            $('#tableBody').find('[checked="checked"]').each(function () {
+                // $('#tableBody').find('td[checked="checked"]').each(function () {
+                ids.push($(this).val());
+                console.log('ids' + ids);
+                trs.push($(this).parent().parent());
+            });
+
+            swal({
+                    title: "你确定?",
+                    text: "记录将被永久删除，此操作不可恢复!",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "是的，删除!",
+                    cancelButtonText: "容我三思",
+                    closeOnConfirm: false
+                    // 设置closeOnConfirm: false，下面二次确认按钮被点击后才会关闭模态框
+                    //上面的按钮被点击，下面的函数才会执行
+                },
+                function () {
+                    $.ajax({
+                        url: requestUrl,
+                        type: 'delete',
+                        data: JSON.stringify(ids),
+                        dataType: 'JSON',
+                        success: function (response) {
+                            if (response.status) {
+                                // 显示正确信息
+                                $('#handleStatus').text('执行成功');
+                                setTimeout(function () {
+                                    $('#handleStatus').empty();
+                                }, 5000);
+
+                                //前端删除
+                                $.each(trs, function () {
+                                    console.log(333);
+                                    $(this).remove();
+                                })
+
+                            } else {
+                                // 显示错误信息
+                                $('#handleStatus').text(response.msg);
+
+                            }
+                        }
+                    });
+                    swal({
+                        title: "删除！",
+                        text: "你的文件已被删除",
+                        type: "success"
+                    })
+                });
+
+        });
+
+        //保存：判断哪些tr发生了改动  --》 td有返回值 --> tr设置edit-status=true
+        $('#saveMulti').click(function () {
+            var updateList = [];
+
+            $('#tableBody').find('tr[edit-status="true"]').each(function () {
+                var tmp = {};
+                tmp['nid'] = $(this).children().first().attr('nid');
+
+                $(this).children('td[edit="true"]').each(function () {
+                    // $(this),是td
+                    var origin = $(this).attr('origin');
+                    var name = $(this).attr('name');
+
+                    if ($(this).attr('edit-type') === 'select') {
+                        var newVal = $(this).attr('new-value');
+                    } else {
+                        var newVal = $(this).text();
+                    }
+
+                    if (origin != newVal) {
+                        tmp[name] = newVal;
+                    }
+                });
+
+                updateList.push(tmp);
+            });
+            
+            //更新数据通过PUT方式发到后台
+            $.ajax({
+                url: requestUrl,
+                type: 'PUT',
+                data: JSON.stringify(updateList),
+                dataType: 'JSON',
+                success: function (response) {
+                    console.log(response);
+                }
+            })
+
+        });
+        
+        //按住ctrl键，批量修改数据
+        ctrStatus = false;
+        
+        window.onkeydown = function(e) {
+            if (e.keyCode == 17) {
+                ctrStatus = true;
+            }
+        };
+        
+        window.onkeyup = function (e) {
+            if (e.keyCode == 17) {
+                ctrStatus = false;
+            }
+        };
+        
+        //表格下拉框绑定change事件
+        $('#tableBody').on('change', 'select', function() {
+            if (ctrStatus) {
+                var v = $(this).val();
+                var $tr = $(this).parent().parent();
+                
+                //其它select元素根据索引来寻找
+                var index = $(this).parent().index();
+                
+                $tr.nextAll().each(function() {
+                    if($(this).find('[type="checkbox"]').prop('checked')) {
+                        $(this).children().eq(index).children().val(v);
+                    }
+                })
+            }
         })
 
-    }
+
+    } //绑定事件函数 结尾 }
 
     //获取搜索条件，处理成字典形式
     function getSearchConditions() {
@@ -320,18 +583,92 @@
         return searchConditions;
     }
 
+    //td进入编辑模式
+    function tdEnterEditMode($td) {
+        //td --> input/select
+        if ($td.attr('edit-type') === 'input') {
+            var inputEle = document.createElement('input');
+            var val = $td.text();
+            $(inputEle).val(val);
+            $(inputEle).attr('class', 'form-control').attr('type', 'text');
+            $td.empty().append(inputEle);
+
+        } else {
+            //select，下拉框，默认选择
+            var selectEle = document.createElement('select');
+            var choice_name = $td.attr('choice_name');
+            var server_status = $td.attr('server_status');
+            var choice_list = GLOBAL_CHOICES_DICT[choice_name];
+            $.each(choice_list, function (i, item) {
+                var optEle = document.createElement('option');
+                optEle.innerText = item[1];
+                optEle.setAttribute('value', item[0]);
+                if (item[0] == server_status) {
+                    $(optEle).prop('selected', true);
+                }
+                $(selectEle).append(optEle).attr('class', 'form-control');
+            });
+            $td.empty().append(selectEle);
+
+        }
+    }
+
+    //td退出编辑模式
+    function tdExitEditMode($td) {
+        //判断是否发生修改，记录老值和新值
+        var editStatus = true;
+        var origin = $td.attr('origin');
+
+        //获取编辑框的值，赋值到td
+        if ($td.attr('edit-type') === 'input') {
+            console.log('123');
+            var val = $td.children('input').val();
+            $td.empty().text(val);
+        } else {
+            //select，获取
+            var val = $td.children('select').val();
+            //通过option value获取option文本 --> 前提，option必须有value属性
+            // var text = $td.find('select')[0].selectedOptions[0].innerText;
+            var text = $td.find('select option[value="' + val + '"]').text();
+            $td.attr('new-value', val); //方便select更新时新旧对比
+            console.log(text);
+            $td.empty().text(text);
+        }
+
+        if (origin != val) {
+            editStatus = true;
+        }
+
+        return editStatus;  //如果有返回值， tr据此标记编辑状态
+
+    }
+
+    //tr进入编辑模式
+    function trEnterEditMode($tr) {
+        $tr.addClass('success');
+        $.each($tr.find('[edit="true"]'), function () {
+            tdEnterEditMode($(this));
+        })
+    }
+
+    //tr退出编辑模式
+    function trExitEditMode($tr) {
+        $tr.removeClass('success');
+        $.each($tr.find('[edit="true"]'), function () {
+            //如果td发生修改，tr记录状态
+            if (tdExitEditMode($(this))) {
+                $tr.attr('edit-status', 'true');
+            }
+        })
+    }
+
     //通过jQuery扩展暴露一个调用接口
     jq.extend({
         'King_func': function (url) {
             requestUrl = url;
             init();
-            bindSearchEvent();
-        },
-        /*
-        'changePage': function (pageNum) {
-            init(pageNum);
+            bindEvent();
         }
-        */
     });
 
 })(jQuery);
@@ -413,4 +750,3 @@
  var name = 'aabb';
  name.format(kwargs);
  */
-
